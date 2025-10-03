@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="paquito">
+  <xacro:property name="chassis_width" value="0.2" />
+  <xacro:property name="chassis_len" value="0.155" />
+  <xacro:property name="chassis_thickness" value="0.003" />
+  <xacro:property name="chassis_height" value="0.06" />
+
+  <material name="black">
+    <color rgba="0 0 0 1"/>
+  </material>
+
+  <material name="gray">
+    <color rgba="0.3 0.3 0.3 1"/>
+  </material>
+
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <cylinder length="0.01" radius="0.02"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <link name="chassis">
+    <visual>
+      <geometry>
+        <box size="${chassis_width} ${chassis_len} ${chassis_thickness}"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+  </link>
+
+  <joint name="base_to_chassis" type="fixed">
+    <parent link="base_link"/>
+    <child link="chassis"/>
+    <origin xyz="0 0 ${chassis_height}"/>
+  </joint>
+
+  <xacro:macro name="wheel" params="name xsign ysign rsign">
+    <link name="${name}_wheel">
+      <visual>
+      <geometry>
+          <cylinder length="0.035" radius="0.0375"/>
+      </geometry>
+      <material name="gray"/>
+      </visual>
+    </link>
+
+    <joint name="${name}_wheel_joint" type="continuous">
+      <parent link="chassis"/>
+      <child link="${name}_wheel"/>
+      <axis xyz="0 0 1"/>
+      <origin xyz="${xsign*0.0775} ${ysign*0.1} -0.03" rpy="${rsign*1.5707} 0 0"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:wheel name="front_left" xsign="1" ysign="-1" rsign="-1"/>
+  <xacro:wheel name="rear_left" xsign="-1" ysign="-1" rsign="-1"/>
+  <xacro:wheel name="front_right" xsign="1" ysign="1" rsign="1"/>
+  <xacro:wheel name="rear_right" xsign="-1" ysign="1" rsign="1"/>
+</robot>
