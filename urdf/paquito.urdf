@@ -4,6 +4,8 @@
   <xacro:property name="chassis_len" value="0.155" />
   <xacro:property name="chassis_thickness" value="0.003" />
   <xacro:property name="chassis_height" value="0.06" />
+  <xacro:property name="wheel_radius" value="0.0375" />
+  <xacro:property name="wheel_thikness" value="0.035" />
 
   <material name="black">
     <color rgba="0 0 0 1"/>
@@ -40,7 +42,7 @@
     <link name="${name}_wheel">
       <visual>
       <geometry>
-          <cylinder length="0.035" radius="0.0375"/>
+          <cylinder length="${wheel_thikness}" radius="${wheel_radius}"/>
       </geometry>
       <material name="gray"/>
       </visual>

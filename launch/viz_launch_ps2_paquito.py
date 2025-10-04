@@ -4,8 +4,7 @@ from ament_index_python.packages import get_package_share_directory
 import os
 
 from launch_ros.descriptions import ParameterValue
-from launch.substitutions import Command, FileContent, PathJoinSubstitution
-from launch_ros.substitutions import FindPackageShare
+from launch.substitutions import Command
 
 def generate_launch_description():
     package_dir = get_package_share_directory('viz_package_cpp')
@@ -18,9 +17,9 @@ def generate_launch_description():
     return LaunchDescription([
         Node(
             package='viz_package_cpp',
-            #namespace='paquito1',
-            executable='move_node',
-            name='move_node',
+            namespace='paquito1',
+            executable='viz_node',
+            name='viz',
             output='screen',
         ),
         # Publica las transformaciones estáticas del modelo
@@ -32,21 +31,19 @@ def generate_launch_description():
             parameters=[{
                 'robot_description': robot_desc,
                 'publish_frequency': 30.0,
-            }],
-            arguments=[FileContent(
-                PathJoinSubstitution([FindPackageShare('viz_package_cpp'), 'urdf', 'paquito.urdf']))]
+            }]
         ),
         # Publica las transformaciones de las articulaciones
-        #Node(
-        #    package='joint_state_publisher',
-        #    name='joint_state_publisher',
-        #    executable='joint_state_publisher',
-        #    output='screen',
-        #    parameters=[{
-        #        'robot_description': robot_desc,
-        #        'publish_frequency': 30.0,
-        #    }]
-        #),
+        Node(
+            package='joint_state_publisher',
+            name='joint_state_publisher',
+            executable='joint_state_publisher',
+            output='screen',
+            parameters=[{
+                'robot_description': robot_desc,
+                'publish_frequency': 30.0,
+            }]
+        ),
         Node(
             package='rviz2',
             executable='rviz2',

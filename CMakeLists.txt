@@ -14,9 +14,12 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 
 add_executable(viz_node src/viz_node.cpp)
 add_executable(move_node src/move_node.cpp)
+add_executable(ps2_joy_node src/ps2_joy_node.cpp)
 add_executable(ps2_control_node src/ps2_control_node.cpp)
 
 target_include_directories(viz_node PUBLIC
@@ -29,12 +32,14 @@ target_include_directories(move_node PUBLIC
 target_compile_features(move_node PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 
 ament_target_dependencies(viz_node rclcpp visualization_msgs std_msgs)
-ament_target_dependencies(move_node rclcpp sensor_msgs geometry_msgs std_msgs)
-ament_target_dependencies(ps2_control_node rclcpp sensor_msgs)
+ament_target_dependencies(move_node rclcpp sensor_msgs geometry_msgs std_msgs tf2_ros tf2_geometry_msgs)
+ament_target_dependencies(ps2_joy_node rclcpp sensor_msgs)
+ament_target_dependencies(ps2_control_node rclcpp sensor_msgs tf2_ros tf2_geometry_msgs)
 
 install(TARGETS
 	viz_node
 	move_node
+  ps2_joy_node
   ps2_control_node
   DESTINATION lib/${PROJECT_NAME})
 
