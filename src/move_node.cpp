@@ -1,4 +1,5 @@
 #include <cmath>
+#include <numbers>
 #include <thread>
 #include <chrono>
 #include <memory>
@@ -13,6 +14,21 @@
 
 using namespace std::chrono_literals;
 
+struct WheelPos
+{
+	const char* const name;
+	double x, y, roll;
+} typedef WheelPos;
+
+const double WHEEL_X = 0.0755;
+const double WHEEL_Y = 0.1;
+const double WHEEL_ROLL = M_PI / 2;
+
+WheelPos fl = WheelPos { "front_left_wheel", WHEEL_X, -WHEEL_Y, -WHEEL_ROLL };
+WheelPos fr = WheelPos { "front_right_wheel", WHEEL_X, WHEEL_Y, WHEEL_ROLL };
+WheelPos rr = WheelPos { "rear_right_wheel", -WHEEL_X, WHEEL_Y, WHEEL_ROLL };
+WheelPos rl = WheelPos { "rear_left_wheel", -WHEEL_X, -WHEEL_Y, -WHEEL_ROLL };
+
 class MovementPublisher : public rclcpp::Node
 {
 public:
@@ -24,7 +40,7 @@ public:
 		// Información tf2 para determinar los ejes del sistema de coordenadas en el sistema 'odom'
 		_broadcaster = std::make_shared<tf2_ros::TransformBroadcaster>(this);
 
-		RCLCPP_INFO(this->get_logger(),"Starting movement state publisher");
+		RCLCPP_INFO(this->get_logger(), "Starting movement state publisher");
 		_loop_rate = std::make_shared<rclcpp::Rate>(33ms);
 		_timer = this->create_wall_timer(33ms,std::bind(&MovementPublisher::publish,this));
 	}
@@ -40,12 +56,12 @@ private:
 
 	/// Variables de estado del robot
 	const double WHEEL_R = 0.0375;
-	const double WHEEL_X = 0.0775;
-	const double WHEEL_Y = 0.1;
 	double front_left_wheel = 0.;
 	double rear_left_wheel = 0.;
 	double front_right_wheel = 0.;
 	double rear_right_wheel = 0.;
+
+	double x = 0., y = 0., roll = 0.;
 
 	// velocidades angulares
 	double w_fl = 3.;
@@ -53,7 +69,39 @@ private:
 	double w_fr = 1.;
 	double w_rr = 1.;
 
+	void publish_wheel_transform(WheelPos&, rclcpp::Time&);
 };
+
+void MovementPublisher::publish_wheel_transform(WheelPos& wheel_pos, rclcpp::Time& time_stamp)
+{
+	geometry_msgs::msg::TransformStamped t;
+
+	// Sistemas de coordenadas
+	t.header.stamp = time_stamp;
+
+	// odom es el sistema de coordenadas base de tf2
+	t.header.frame_id = "chassis";
+	// base_link es la base del sistema de coordenadas como fue declarado en el urdf
+	t.child_frame_id = wheel_pos.name;
+
+
+	// Posición de la llanta
+	// add translation change
+	t.transform.translation.x = wheel_pos.x;
+	t.transform.translation.y = wheel_pos.y;
+	t.transform.translation.z = -0.03;
+
+	// Ángulo de Euler a cuaternión para indicar la rotación
+	tf2::Quaternion q;
+	q.setRPY(wheel_pos.roll, 0, 0);
+	t.transform.rotation.x = q.x();
+	t.transform.rotation.y = q.y();
+	t.transform.rotation.z = q.z();
+	t.transform.rotation.w = q.w();
+
+	// Publicar
+	_broadcaster->sendTransform(t);
+}
 
 void MovementPublisher::publish()
 {
@@ -61,12 +109,14 @@ void MovementPublisher::publish()
 	rclcpp::Time time_stamp = this->get_clock()->now();
 	rclcpp::Duration delta_t_duration = time_stamp - prev_t;
 	double delta_t = delta_t_duration.seconds();
-	if (delta_t >= 1.)
-	{
+	//if (delta_t >= 1.)
+	//{
+		prev_t = time_stamp;
+		
 		// Mensajes
 		geometry_msgs::msg::TransformStamped t;
 		sensor_msgs::msg::JointState joint_state;
-		prev_t = time_stamp;
+		
 
 		// Articulaciones
 		joint_state.header.stamp = time_stamp;
@@ -97,17 +147,26 @@ void MovementPublisher::publish()
 		// Posición del robot
 		// Cinemática directa
 		// https://automaticaddison.com/how-to-simulate-a-mobile-robot-in-gazebo-ros-2-jazzy/#Mecanum_Wheel_Forward_and_Inverse_Kinematics
-		double v_x = WHEEL_R * (w_fl + w_fr + w_rr + w_rl) / 4;
-		double v_y = WHEEL_R * (-w_fl + w_fr + w_rr - w_rl) / 4;
-		double w_z = WHEEL_R * (-w_fl + w_fr - w_rr + w_rl) / (4 * (WHEEL_X + WHEEL_Y));
+
+		// En el sistema de coordenadas del robot
+		double v_x = WHEEL_R * (w_fl + w_rl + w_fr + w_rr) / 4;
+		double v_y = WHEEL_R * (w_fl - w_rl - w_fr + w_rr) / 4;
+		double w_z = WHEEL_R * (w_fl + w_rl - w_fr - w_rr) / (4 * (WHEEL_X + WHEEL_Y));
+		double delta_x = v_x * delta_t;
+		double delta_y = v_y * delta_t;
+		x += delta_x * cos(roll) - delta_y * sin(roll);
+		y += delta_x * sin(roll) + delta_y * cos(roll);
+		roll += w_z * delta_t;
+
+		// Pasar a sistema de coordenadas global
 		// add translation change
-		t.transform.translation.x = v_x * delta_t;
-		t.transform.translation.y = v_y * delta_t;
+		t.transform.translation.x = x ;
+		t.transform.translation.y = y;
 		t.transform.translation.z = 0;
 
 		// Ángulo de Euler a cuaternión para indicar la rotación
 		tf2::Quaternion q;
-		q.setRPY(0, 0, w_z * delta_t);
+		q.setRPY(0, 0, roll);
 		t.transform.rotation.x = q.x();
 		t.transform.rotation.y = q.y();
 		t.transform.rotation.z = q.z();
@@ -122,8 +181,12 @@ void MovementPublisher::publish()
 
 		// Publicar
 		_broadcaster->sendTransform(t);
+		publish_wheel_transform(fl, time_stamp);
+		publish_wheel_transform(fr, time_stamp);
+		publish_wheel_transform(rr, time_stamp);
+		publish_wheel_transform(rl, time_stamp);
 		_joint_publisher->publish(joint_state);
-	}
+	//}
 }
 
 int main(int argc, char ** argv)

@@ -57,7 +57,7 @@
   </xacro:macro>
 
   <xacro:wheel name="front_left" xsign="1" ysign="-1" rsign="-1"/>
-  <xacro:wheel name="rear_left" xsign="-1" ysign="-1" rsign="-1"/>
   <xacro:wheel name="front_right" xsign="1" ysign="1" rsign="1"/>
   <xacro:wheel name="rear_right" xsign="-1" ysign="1" rsign="1"/>
+  <xacro:wheel name="rear_left" xsign="-1" ysign="-1" rsign="-1"/>
 </robot>
