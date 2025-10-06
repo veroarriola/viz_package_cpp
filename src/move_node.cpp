@@ -24,10 +24,10 @@ const double WHEEL_X = 0.0755;
 const double WHEEL_Y = 0.1;
 const double WHEEL_ROLL = M_PI / 2;
 
-WheelPos fl = WheelPos { "front_left_wheel", WHEEL_X, -WHEEL_Y, -WHEEL_ROLL };
-WheelPos fr = WheelPos { "front_right_wheel", WHEEL_X, WHEEL_Y, WHEEL_ROLL };
-WheelPos rr = WheelPos { "rear_right_wheel", -WHEEL_X, WHEEL_Y, WHEEL_ROLL };
-WheelPos rl = WheelPos { "rear_left_wheel", -WHEEL_X, -WHEEL_Y, -WHEEL_ROLL };
+WheelPos fl = WheelPos { "front_left_wheel", WHEEL_X, WHEEL_Y, WHEEL_ROLL };
+WheelPos fr = WheelPos { "front_right_wheel", WHEEL_X, -WHEEL_Y, WHEEL_ROLL };
+WheelPos rr = WheelPos { "rear_right_wheel", -WHEEL_X, -WHEEL_Y, WHEEL_ROLL };
+WheelPos rl = WheelPos { "rear_left_wheel", -WHEEL_X, WHEEL_Y, WHEEL_ROLL };
 
 class MovementPublisher : public rclcpp::Node
 {
@@ -150,8 +150,8 @@ void MovementPublisher::publish()
 
 		// En el sistema de coordenadas del robot
 		double v_x = WHEEL_R * (w_fl + w_rl + w_fr + w_rr) / 4;
-		double v_y = WHEEL_R * (w_fl - w_rl - w_fr + w_rr) / 4;
-		double w_z = WHEEL_R * (w_fl + w_rl - w_fr - w_rr) / (4 * (WHEEL_X + WHEEL_Y));
+		double v_y = WHEEL_R * (-w_fl + w_rl + w_fr - w_rr) / 4;
+		double w_z = WHEEL_R * (-w_fl - w_rl + w_fr + w_rr) / (4 * (WHEEL_X + WHEEL_Y));
 		double delta_x = v_x * delta_t;
 		double delta_y = v_y * delta_t;
 		x += delta_x * cos(roll) - delta_y * sin(roll);

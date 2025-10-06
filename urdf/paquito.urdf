@@ -15,6 +15,14 @@
     <color rgba="0.3 0.3 0.3 1"/>
   </material>
 
+  <material name="green">
+    <color rgba="0.3 0.9 0.3 1"/>
+  </material>
+
+  <material name="blue">
+    <color rgba="0.3 0.3 0.9 1"/>
+  </material>
+
   <link name="base_link">
     <visual>
       <geometry>
@@ -38,13 +46,13 @@
     <origin xyz="0 0 ${chassis_height}"/>
   </joint>
 
-  <xacro:macro name="wheel" params="name xsign ysign rsign">
+  <xacro:macro name="wheel" params="name xsign ysign rsign material">
     <link name="${name}_wheel">
       <visual>
       <geometry>
           <cylinder length="${wheel_thikness}" radius="${wheel_radius}"/>
       </geometry>
-      <material name="gray"/>
+      <material name="${material}"/>
       </visual>
     </link>
 
@@ -56,8 +64,8 @@
     </joint>
   </xacro:macro>
 
-  <xacro:wheel name="front_left" xsign="1" ysign="-1" rsign="-1"/>
-  <xacro:wheel name="front_right" xsign="1" ysign="1" rsign="1"/>
-  <xacro:wheel name="rear_right" xsign="-1" ysign="1" rsign="1"/>
-  <xacro:wheel name="rear_left" xsign="-1" ysign="-1" rsign="-1"/>
+  <xacro:wheel name="front_left" xsign="1" ysign="1" rsign="1" material="blue"/>
+  <xacro:wheel name="front_right" xsign="1" ysign="-1" rsign="1" material="blue"/>
+  <xacro:wheel name="rear_right" xsign="-1" ysign="-1" rsign="1" material="gray"/>
+  <xacro:wheel name="rear_left" xsign="-1" ysign="1" rsign="1" material="green"/>
 </robot>
