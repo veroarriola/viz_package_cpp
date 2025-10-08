@@ -4,6 +4,8 @@
   <xacro:property name="chassis_len" value="0.155" />
   <xacro:property name="chassis_thickness" value="0.003" />
   <xacro:property name="chassis_height" value="0.06" />
+  <xacro:property name="wheel_xsep" value="0.0775" />
+  <xacro:property name="wheel_ysep" value="0.1" />
   <xacro:property name="wheel_radius" value="0.0375" />
   <xacro:property name="wheel_thikness" value="0.035" />
 

@@ -3,6 +3,10 @@
 #include <iostream>
 #include <vector>
 
+#include <geometry_msgs/msg/twist.hpp>
+
+#include "paquito.hpp"
+
 // Generado con ayuda de Gemini 2.5 Pro y adaptado
 using std::placeholders::_1;
 
