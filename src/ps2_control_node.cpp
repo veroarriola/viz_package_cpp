@@ -21,30 +21,32 @@ public:
         // El tipo de mensaje es sensor_msgs::msg::Joy.
         // El '10' es la profundidad de la cola (Quality of Service).
         // El callback se enlaza usando std::bind.
-        subscription_ = this->create_subscription<sensor_msgs::msg::Joy>(
+        _subscription = this->create_subscription<sensor_msgs::msg::Joy>(
             "joy", 10, std::bind(&JoySubscriber::joy_callback, this, _1));
 
-        RCLCPP_INFO(this->get_logger(), "Nodo lector de control de PlayStation iniciado. Esperando mensajes en /joy...");
+        // Publicará las velocidades solicitadas según el uso del control PS2
+        _vel_publisher = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
+
+
+        RCLCPP_INFO(this->get_logger(), "Nodo de control de PlayStation iniciado. Esperando mensajes en /joy...");
     }
 
 private:
     // Función de callback que se ejecuta al recibir un mensaje
-    void joy_callback(const sensor_msgs::msg::Joy::SharedPtr msg) const
+    void joy_callback(const sensor_msgs::msg::Joy::SharedPtr msg)
     {
-        // Imprime una cabecera para mayor claridad
-        RCLCPP_INFO(this->get_logger(), "-----------------------------------------");
-        RCLCPP_INFO(this->get_logger(), "Estado del Control de PlayStation Recibido:");
+        geometry_msgs::msg::Twist twist;
 
-        // Imprime el estado de los botones
-        // msg->buttons es un vector de enteros (0 para no presionado, 1 para presionado)
-        RCLCPP_INFO(this->get_logger(), "Botones:");
-        for (size_t i = 0; i < msg->buttons.size(); ++i)
-        {
-            // Usamos un stream para construir el mensaje de log
-            std::stringstream ss;
-            ss << "  Boton " << i << ": " << (msg->buttons[i] ? "Presionado" : "Suelto");
-            RCLCPP_INFO(this->get_logger(), "%s", ss.str().c_str());
+        if (msg->buttons[0]) {
+            speed -= 1;
+        } else if(msg->buttons[2]) {
+            speed += 1;
         }
+
+        twist.linear.x = msg->axes[0] * speed;
+        twist.linear.y = msg->axes[1] * speed;
+        twist.angular.z = msg->axes[3] * speed;
+        
 
         // Imprime el estado de los ejes
         // msg->axes es un vector de floats, generalmente entre -1.0 y 1.0
@@ -55,9 +57,13 @@ private:
             ss << "  Eje " << i << ": " << msg->axes[i];
             RCLCPP_INFO(this->get_logger(), "%s", ss.str().c_str());
         }
+
+        _vel_publisher->publish(twist);
     }
 
-    rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr subscription_;
+    rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr _subscription;
+    rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr _vel_publisher;
+    double speed = 0;
 };
 
 int main(int argc, char * argv[])

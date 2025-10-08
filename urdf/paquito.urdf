@@ -62,7 +62,7 @@
       <parent link="chassis"/>
       <child link="${name}_wheel"/>
       <axis xyz="0 0 1"/>
-      <origin xyz="${xsign*0.0775} ${ysign*0.1} -0.03" rpy="${rsign*1.5707} 0 0"/>
+      <origin xyz="${xsign*wheel_xsep} ${ysign*wheel_ysep} -0.03" rpy="${rsign*1.5707} 0 0"/>
     </joint>
   </xacro:macro>
 

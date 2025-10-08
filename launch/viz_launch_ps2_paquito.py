@@ -17,8 +17,15 @@ def generate_launch_description():
     return LaunchDescription([
         Node(
             package='viz_package_cpp',
-            namespace='paquito1',
-            executable='viz_node',
+            #namespace='paquito1',
+            executable='move_node',
+            name='viz',
+            output='screen',
+        ),
+        Node(
+            package='viz_package_cpp',
+            #namespace='paquito1',
+            executable='ps2_control_node',
             name='viz',
             output='screen',
         ),
@@ -34,16 +41,16 @@ def generate_launch_description():
             }]
         ),
         # Publica las transformaciones de las articulaciones
-        Node(
-            package='joint_state_publisher',
-            name='joint_state_publisher',
-            executable='joint_state_publisher',
-            output='screen',
-            parameters=[{
-                'robot_description': robot_desc,
-                'publish_frequency': 30.0,
-            }]
-        ),
+        #Node(
+        #    package='joint_state_publisher',
+        #    name='joint_state_publisher',
+        #    executable='joint_state_publisher',
+        #    output='screen',
+        #    parameters=[{
+        #        'robot_description': robot_desc,
+        #        'publish_frequency': 30.0,
+        #    }]
+        #),
         Node(
             package='rviz2',
             executable='rviz2',
