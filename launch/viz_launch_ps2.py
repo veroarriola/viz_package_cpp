@@ -18,38 +18,9 @@ def generate_launch_description():
         Node(
             package='viz_package_cpp',
             #namespace='paquito1',
-            executable='ps2_control_node',
-            name='ps2_control',
+            executable='ps2_joy_node',
+            name='ps2_hoy',
             output='screen',
-        ),
-        # Publica las transformaciones estáticas del modelo
-        Node(
-            package='robot_state_publisher',
-            name='robot_state_publisher',
-            executable='robot_state_publisher',
-            output='screen',
-            parameters=[{
-                'robot_description': robot_desc,
-                'publish_frequency': 30.0,
-            }]
-        ),
-        # Publica las transformaciones de las articulaciones
-        Node(
-            package='joint_state_publisher',
-            name='joint_state_publisher',
-            executable='joint_state_publisher',
-            output='screen',
-            parameters=[{
-                'robot_description': robot_desc,
-                'publish_frequency': 30.0,
-            }]
-        ),
-        Node(
-            package='rviz2',
-            executable='rviz2',
-            name='rviz2',
-            arguments=['-d', os.path.join(package_dir, 'rviz', 'panel.rviz')],
-            output='screen'
         ),
         Node(
             package='joy',

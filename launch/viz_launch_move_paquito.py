@@ -4,7 +4,8 @@ from ament_index_python.packages import get_package_share_directory
 import os
 
 from launch_ros.descriptions import ParameterValue
-from launch.substitutions import Command
+from launch.substitutions import Command, FileContent, PathJoinSubstitution
+from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
     package_dir = get_package_share_directory('viz_package_cpp')
@@ -15,20 +16,11 @@ def generate_launch_description():
                     Command(['xacro ', str(path_to_urdf)]), value_type=str
                 )
     return LaunchDescription([
-        # Publica las transformaciones de las articulaciones
         Node(
-            package='viz_package_cpp',
+             package='viz_package_cpp',
             #namespace='paquito1',
             executable='move_node',
-            name='viz',
-            output='screen',
-        ),
-        # Convierte las pulsaciones del control en mensajes de velocidad
-        Node(
-            package='viz_package_cpp',
-            #namespace='paquito1',
-            executable='ps2_control_node',
-            name='viz',
+            name='move_node',
             output='screen',
         ),
         # Publica las transformaciones estáticas del modelo
@@ -40,19 +32,15 @@ def generate_launch_description():
             parameters=[{
                 'robot_description': robot_desc,
                 'publish_frequency': 30.0,
-            }]
+            }],
+            arguments=[FileContent(
+                PathJoinSubstitution([FindPackageShare('viz_package_cpp'), 'urdf', 'paquito.urdf']))]
         ),
         Node(
             package='rviz2',
             executable='rviz2',
             name='rviz2',
             arguments=['-d', os.path.join(package_dir, 'rviz', 'panel.rviz')],
-            output='screen'
-        ),
-        Node(
-            package='joy',
-            executable='joy_node',
-            name='joy_node',
             output='screen'
         )
     ])

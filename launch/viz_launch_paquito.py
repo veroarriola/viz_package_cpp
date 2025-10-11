@@ -16,13 +16,6 @@ def generate_launch_description():
                     Command(['xacro ', str(path_to_urdf)]), value_type=str
                 )
     return LaunchDescription([
-        Node(
-            package='viz_package_cpp',
-            #namespace='paquito1',
-            executable='move_node',
-            name='move_node',
-            output='screen',
-        ),
         # Publica las transformaciones estáticas del modelo
         Node(
             package='robot_state_publisher',
@@ -37,16 +30,16 @@ def generate_launch_description():
                 PathJoinSubstitution([FindPackageShare('viz_package_cpp'), 'urdf', 'paquito.urdf']))]
         ),
         # Publica las transformaciones de las articulaciones
-        #Node(
-        #    package='joint_state_publisher',
-        #    name='joint_state_publisher',
-        #    executable='joint_state_publisher',
-        #    output='screen',
-        #    parameters=[{
-        #        'robot_description': robot_desc,
-        #        'publish_frequency': 30.0,
-        #    }]
-        #),
+        Node(
+            package='joint_state_publisher',
+            name='joint_state_publisher',
+            executable='joint_state_publisher',
+            output='screen',
+            parameters=[{
+                'robot_description': robot_desc,
+                'publish_frequency': 30.0,
+            }]
+        ),
         Node(
             package='rviz2',
             executable='rviz2',

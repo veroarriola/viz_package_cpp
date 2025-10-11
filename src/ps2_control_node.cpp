@@ -7,6 +7,27 @@
 
 #include "paquito.hpp"
 
+#define ZHI_XU
+/// Control PS2
+#if defined(PS2)
+const unsigned int X_AXIS = 0;
+const unsigned int Y_AXIS = 1;
+const unsigned int Z_AXIS = 3;  // ?
+
+const unsigned int STOP = ;
+const unsigned int SPEED_UP = 2;
+const unsigned int SPEED_DOWN = 0;
+/// Control ZhiXu
+#elif defined(ZHI_XU)
+const unsigned int X_AXIS = 1;      // Joy izquierdo
+const unsigned int Y_AXIS = 0;
+const unsigned int Z_AXIS = 2;      // Joy derecho horizontal
+
+const unsigned int STOP = 9;        // Atrás inferior derecha
+const unsigned int SPEED_UP = 4;    // X (Botón superior)
+const unsigned int SPEED_DOWN = 3;  // Y (Botón izquierdo)
+#endif
+
 // Generado con ayuda de Gemini 2.5 Pro y adaptado
 using std::placeholders::_1;
 
@@ -28,35 +49,48 @@ public:
         _vel_publisher = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
 
 
-        RCLCPP_INFO(this->get_logger(), "Nodo de control de PlayStation iniciado. Esperando mensajes en /joy...");
+        RCLCPP_INFO(this->get_logger(), "Nodo de control de PlayStation iniciado. Esperando mensajes en /joy...  Publicando en /cmd_vel...");
     }
 
 private:
+    void log_state(const sensor_msgs::msg::Joy::SharedPtr msg)
+    {
+        std::stringstream ss;
+
+        // Imprime el estado de botones, ejes y variables de interés
+        // msg->axes es un vector de floats, generalmente entre -1.0 y 1.0
+        RCLCPP_INFO(this->get_logger(), "Botones:");
+        ss << " Eje x " << X_AXIS << ": " << msg->axes[X_AXIS] << std::endl;
+        ss << " Eje y " << Y_AXIS << ": " << msg->axes[Y_AXIS] << std::endl;
+        ss << " Eje z (giro) " << Z_AXIS << ": " << msg->axes[Z_AXIS] << std::endl;
+
+        ss << " Botón acelera " << SPEED_UP << ": " << (msg->buttons[SPEED_UP] ? "Presionado" : "Suelto") << std::endl;
+        ss << " Botón frena " << SPEED_UP << ": " << (msg->buttons[SPEED_UP] ? "Presionado" : "Suelto") << std::endl;
+        ss << " Botón alto " << STOP << ": " << (msg->buttons[STOP] ? "Presionado" : "Suelto") << std::endl;
+
+        ss << " Rapidez = " << speed << std::endl;
+
+        RCLCPP_INFO(this->get_logger(), "%s", ss.str().c_str());
+    }
+
     // Función de callback que se ejecuta al recibir un mensaje
     void joy_callback(const sensor_msgs::msg::Joy::SharedPtr msg)
     {
         geometry_msgs::msg::Twist twist;
 
-        if (msg->buttons[0]) {
+        if (msg->buttons[SPEED_DOWN]) {
             speed -= 1;
-        } else if(msg->buttons[2]) {
+        } else if(msg->buttons[SPEED_UP]) {
             speed += 1;
+        } else if(msg->buttons[STOP]) {
+            speed = 0;
         }
 
-        twist.linear.x = msg->axes[0] * speed;
-        twist.linear.y = msg->axes[1] * speed;
-        twist.angular.z = msg->axes[3] * speed;
-        
+        twist.linear.x = msg->axes[X_AXIS] * speed;
+        twist.linear.y = msg->axes[Y_AXIS] * speed;
+        twist.angular.z = msg->axes[Z_AXIS] * speed;
 
-        // Imprime el estado de los ejes
-        // msg->axes es un vector de floats, generalmente entre -1.0 y 1.0
-        RCLCPP_INFO(this->get_logger(), "Ejes:");
-        for (size_t i = 0; i < msg->axes.size(); ++i)
-        {
-            std::stringstream ss;
-            ss << "  Eje " << i << ": " << msg->axes[i];
-            RCLCPP_INFO(this->get_logger(), "%s", ss.str().c_str());
-        }
+        log_state(msg);
 
         _vel_publisher->publish(twist);
     }
