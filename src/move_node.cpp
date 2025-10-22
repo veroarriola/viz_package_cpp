@@ -36,7 +36,7 @@ public:
 
 		RCLCPP_INFO(this->get_logger(), "Starting movement state publisher");
 		_loop_rate = std::make_shared<rclcpp::Rate>(33ms);
-		_timer = this->create_wall_timer(33ms,std::bind(&MovementPublisher::publish,this));
+		_timer = this->create_wall_timer(33ms,std::bind(&MovementPublisher::publish, this));
 	}
 
 	void set_velocity(const geometry_msgs::msg::Twist);

@@ -42,6 +42,12 @@ def generate_launch_description():
             name='rviz2',
             arguments=['-d', os.path.join(package_dir, 'rviz', 'panel.rviz')],
             output='screen'
-        )
+        ),
+        Node(
+            package='viz_package_cpp',
+            executable='circle_control_node',
+            name='circle_control_node',
+            output='screen',
+        ),
     ])
 
