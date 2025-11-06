@@ -7,14 +7,14 @@
 
 #include "paquito.hpp"
 
-#define ZHI_XU
+#define PS2
 /// Control PS2
 #if defined(PS2)
-const unsigned int X_AXIS = 0;
-const unsigned int Y_AXIS = 1;
+const unsigned int X_AXIS = 1;
+const unsigned int Y_AXIS = 0;
 const unsigned int Z_AXIS = 3;  // ?
 
-const unsigned int STOP = ;
+const unsigned int STOP = 3;
 const unsigned int SPEED_UP = 2;
 const unsigned int SPEED_DOWN = 0;
 /// Control ZhiXu
@@ -65,7 +65,7 @@ private:
         ss << " Eje z (giro) " << Z_AXIS << ": " << msg->axes[Z_AXIS] << std::endl;
 
         ss << " Botón acelera " << SPEED_UP << ": " << (msg->buttons[SPEED_UP] ? "Presionado" : "Suelto") << std::endl;
-        ss << " Botón frena " << SPEED_UP << ": " << (msg->buttons[SPEED_UP] ? "Presionado" : "Suelto") << std::endl;
+        ss << " Botón frena " << SPEED_DOWN << ": " << (msg->buttons[SPEED_DOWN] ? "Presionado" : "Suelto") << std::endl;
         ss << " Botón alto " << STOP << ": " << (msg->buttons[STOP] ? "Presionado" : "Suelto") << std::endl;
 
         ss << " Rapidez = " << speed << std::endl;
