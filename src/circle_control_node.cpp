@@ -25,7 +25,7 @@ private:
 	void trace_curve()
 	{
 		rclcpp::Time time = this->get_clock()->now();
-		double secs = time.seconds();
+		//double secs = time.seconds();
 
 		geometry_msgs::msg::Twist twist;
 
